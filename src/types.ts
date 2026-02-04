@@ -10,6 +10,9 @@ export interface MoltbotEnv {
   // AI Gateway configuration (preferred)
   AI_GATEWAY_API_KEY?: string; // API key for the provider configured in AI Gateway
   AI_GATEWAY_BASE_URL?: string; // AI Gateway URL (e.g., https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic)
+  // OpenRouter configuration (highest priority, uses OpenAI API protocol)
+  OPENROUTER_API_KEY?: string;
+  OPENROUTER_BASE_URL?: string;
   // Legacy direct provider configuration (fallback)
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_BASE_URL?: string;
@@ -18,6 +21,7 @@ export interface MoltbotEnv {
 
   CLAWDBOT_BIND_MODE?: string;
   DEV_MODE?: string; // Set to 'true' for local dev (skips CF Access auth + moltbot device pairing)
+  E2E_TEST_MODE?: string; // Set to 'true' for E2E tests (skips CF Access auth but keeps device pairing)
   DEBUG_ROUTES?: string; // Set to 'true' to enable /debug/* routes
   SANDBOX_SLEEP_AFTER?: string; // How long before sandbox sleeps: 'never' (default), or duration like '10m', '1h'
   TELEGRAM_BOT_TOKEN?: string;
