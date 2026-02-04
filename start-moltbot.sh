@@ -271,15 +271,15 @@ if (isOpenRouter) {
         api: 'openai-responses',
         models: [
             { id: 'gpt-5.2', name: 'GPT-5.2', contextWindow: 200000 },
-            { id: 'gpt-5', name: 'GPT-5', contextWindow: 200000 },
-            { id: 'gpt-4.5-preview', name: 'GPT-4.5 Preview', contextWindow: 128000 },
+            { id: 'gpt-5-mini', name: 'GPT-5', contextWindow: 200000 },
+            { id: 'gpt-5.2-chat', name: 'GPT-4.5 Preview', contextWindow: 128000 },
         ]
     };
     // Add models to the allowlist so they appear in /models
     config.agents.defaults.models = config.agents.defaults.models || {};
     config.agents.defaults.models['openai/gpt-5.2'] = { alias: 'GPT-5.2' };
-    config.agents.defaults.models['openai/gpt-5'] = { alias: 'GPT-5' };
-    config.agents.defaults.models['openai/gpt-4.5-preview'] = { alias: 'GPT-4.5' };
+    config.agents.defaults.models['openai/gpt-5-mini'] = { alias: 'GPT-5' };
+    config.agents.defaults.models['openai/gpt-5.2-chat'] = { alias: 'GPT-4.5' };
     config.agents.defaults.model.primary = 'openai/gpt-5.2';
 } else if (baseUrl) {
     console.log('Configuring Anthropic provider with base URL:', baseUrl);
@@ -289,9 +289,9 @@ if (isOpenRouter) {
         baseUrl: baseUrl,
         api: 'anthropic-messages',
         models: [
-            { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', contextWindow: 200000 },
-            { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', contextWindow: 200000 },
-            { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', contextWindow: 200000 },
+            { id: 'claude-opus-4.5', name: 'Claude Opus 4.5', contextWindow: 200000 },
+            { id: 'claude-sonnet-4.5', name: 'Claude Sonnet 4.5', contextWindow: 200000 },
+            { id: 'claude-haiku-4.5', name: 'Claude Haiku 4.5', contextWindow: 200000 },
         ]
     };
     // Include API key in provider config if set (required when using custom baseUrl)
@@ -301,7 +301,7 @@ if (isOpenRouter) {
     config.models.providers.anthropic = providerConfig;
     // Add models to the allowlist so they appear in /models
     config.agents.defaults.models = config.agents.defaults.models || {};
-    config.agents.defaults.models['anthropic/claude-sonnet-4.5'] = { alias: 'Opus 4.5' };
+    config.agents.defaults.models['anthropic/claude-opus-4.5'] = { alias: 'Opus 4.5' };
     config.agents.defaults.models['anthropic/claude-sonnet-4.5'] = { alias: 'Sonnet 4.5' };
     config.agents.defaults.models['anthropic/claude-haiku-4.5'] = { alias: 'Haiku 4.5' };
     config.agents.defaults.model.primary = 'anthropic/claude-sonnet-4.5';
