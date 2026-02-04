@@ -9,39 +9,48 @@ import type { MoltbotEnv } from '../types';
 export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   const envVars: Record<string, string> = {};
 
-  // Normalize the base URL by removing trailing slashes
-  const normalizedBaseUrl = env.AI_GATEWAY_BASE_URL?.replace(/\/+$/, '');
-  const isOpenAIGateway = normalizedBaseUrl?.endsWith('/openai');
-
-  // AI Gateway vars take precedence
-  // Map to the appropriate provider env var based on the gateway endpoint
-  if (env.AI_GATEWAY_API_KEY) {
-    if (isOpenAIGateway) {
-      envVars.OPENAI_API_KEY = env.AI_GATEWAY_API_KEY;
-    } else {
-      envVars.ANTHROPIC_API_KEY = env.AI_GATEWAY_API_KEY;
+  // Check for OpenRouter API key first - if present, use OpenAI API protocol format
+  if (env.OPENROUTER_API_KEY) {
+    envVars.OPENAI_API_KEY = env.OPENROUTER_API_KEY;
+    if (env.OPENROUTER_BASE_URL) {
+      envVars.OPENAI_BASE_URL = env.OPENROUTER_BASE_URL;
     }
-  }
+  } else {
+    // Original logic: determine provider based on AI Gateway URL
+    // Normalize the base URL by removing trailing slashes
+    const normalizedBaseUrl = env.AI_GATEWAY_BASE_URL?.replace(/\/+$/, '');
+    const isOpenAIGateway = normalizedBaseUrl?.endsWith('/openai');
 
-  // Fall back to direct provider keys
-  if (!envVars.ANTHROPIC_API_KEY && env.ANTHROPIC_API_KEY) {
-    envVars.ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
-  }
-  if (!envVars.OPENAI_API_KEY && env.OPENAI_API_KEY) {
-    envVars.OPENAI_API_KEY = env.OPENAI_API_KEY;
-  }
-
-  // Pass base URL (used by start-moltbot.sh to determine provider)
-  if (normalizedBaseUrl) {
-    envVars.AI_GATEWAY_BASE_URL = normalizedBaseUrl;
-    // Also set the provider-specific base URL env var
-    if (isOpenAIGateway) {
-      envVars.OPENAI_BASE_URL = normalizedBaseUrl;
-    } else {
-      envVars.ANTHROPIC_BASE_URL = normalizedBaseUrl;
+    // AI Gateway vars take precedence
+    // Map to the appropriate provider env var based on the gateway endpoint
+    if (env.AI_GATEWAY_API_KEY) {
+      if (isOpenAIGateway) {
+        envVars.OPENAI_API_KEY = env.AI_GATEWAY_API_KEY;
+      } else {
+        envVars.ANTHROPIC_API_KEY = env.AI_GATEWAY_API_KEY;
+      }
     }
-  } else if (env.ANTHROPIC_BASE_URL) {
-    envVars.ANTHROPIC_BASE_URL = env.ANTHROPIC_BASE_URL;
+
+    // Fall back to direct provider keys
+    if (!envVars.ANTHROPIC_API_KEY && env.ANTHROPIC_API_KEY) {
+      envVars.ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
+    }
+    if (!envVars.OPENAI_API_KEY && env.OPENAI_API_KEY) {
+      envVars.OPENAI_API_KEY = env.OPENAI_API_KEY;
+    }
+
+    // Pass base URL (used by start-moltbot.sh to determine provider)
+    if (normalizedBaseUrl) {
+      envVars.AI_GATEWAY_BASE_URL = normalizedBaseUrl;
+      // Also set the provider-specific base URL env var
+      if (isOpenAIGateway) {
+        envVars.OPENAI_BASE_URL = normalizedBaseUrl;
+      } else {
+        envVars.ANTHROPIC_BASE_URL = normalizedBaseUrl;
+      }
+    } else if (env.ANTHROPIC_BASE_URL) {
+      envVars.ANTHROPIC_BASE_URL = env.ANTHROPIC_BASE_URL;
+    }
   }
   // Map MOLTBOT_GATEWAY_TOKEN to CLAWDBOT_GATEWAY_TOKEN (container expects this name)
   if (env.MOLTBOT_GATEWAY_TOKEN) envVars.CLAWDBOT_GATEWAY_TOKEN = env.MOLTBOT_GATEWAY_TOKEN;
