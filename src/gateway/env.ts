@@ -12,6 +12,7 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   // Check for OpenRouter API key first - if present, use OpenAI API protocol format
   if (env.OPENROUTER_API_KEY) {
     envVars.OPENAI_API_KEY = env.OPENROUTER_API_KEY;
+    envVars.OPENROUTER_API_KEY = env.OPENROUTER_API_KEY; // Also pass to container for detection in start-moltbot.sh
     if (env.OPENROUTER_BASE_URL) {
       envVars.OPENAI_BASE_URL = env.OPENROUTER_BASE_URL;
     }
