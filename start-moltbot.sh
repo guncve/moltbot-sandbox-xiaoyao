@@ -241,23 +241,25 @@ if (isOpenRouter) {
         baseUrl: openRouterBaseUrl,
         api: 'openai-chat',
         models: [
-            { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4', contextWindow: 200000 },
-            { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', contextWindow: 200000 },
+            { id: 'openai/gpt-5.2', name: 'GPT-5.2', contextWindow: 200000 },
+            { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5', contextWindow: 200000 },
+            { id: 'anthropic/claude-sonnet-4.5', name: 'Claude Sonnet 4.5', contextWindow: 200000 },
             { id: 'openai/gpt-4o', name: 'GPT-4o', contextWindow: 128000 },
-            { id: 'openai/gpt-4-turbo', name: 'GPT-4 Turbo', contextWindow: 128000 },
-            { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash', contextWindow: 1000000 },
-            { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat', contextWindow: 64000 },
+            { id: 'openai/gpt-4o-mini', name: 'GPT-4 mini', contextWindow: 128000 },
+            { id: 'google/gemini-3-flash-preview', name: 'Gemini 3.0 Flas', contextWindow: 1000000 },
+            { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek Chat', contextWindow: 64000 },
         ]
     };
     // Add models to the allowlist so they appear in /models
     config.agents.defaults.models = config.agents.defaults.models || {};
-    config.agents.defaults.models['openai/anthropic/claude-sonnet-4'] = { alias: 'Claude Sonnet 4' };
-    config.agents.defaults.models['openai/anthropic/claude-3.5-sonnet'] = { alias: 'Claude 3.5 Sonnet' };
-    config.agents.defaults.models['openai/openai/gpt-4o'] = { alias: 'GPT-4o' };
-    config.agents.defaults.models['openai/openai/gpt-4-turbo'] = { alias: 'GPT-4 Turbo' };
-    config.agents.defaults.models['openai/google/gemini-2.0-flash-001'] = { alias: 'Gemini 2.0 Flash' };
-    config.agents.defaults.models['openai/deepseek/deepseek-chat'] = { alias: 'DeepSeek Chat' };
-    config.agents.defaults.model.primary = 'openai/anthropic/claude-sonnet-4';
+    config.agents.defaults.models['openai/gpt-5.2'] = { alias: 'GPT-5.2' };
+    config.agents.defaults.models['anthropic/claude-haiku-4.5'] = { alias: 'Claude Haiku 4.5' };
+    config.agents.defaults.models['anthropic/claude-sonnet-4.5'] = { alias: 'Claude Sonnet 4.5' };
+    config.agents.defaults.models['openai/gpt-4o'] = { alias: 'GPT-4o' };
+    config.agents.defaults.models['openai/gpt-4o-mini'] = { alias: 'GPT-4 mini' };
+    config.agents.defaults.models['google/gemini-3-flash-preview'] = { alias: 'Gemini 3.0 Flash' };
+    config.agents.defaults.models['deepseek/deepseek-v3.2'] = { alias: 'DeepSeek Chat' };
+    config.agents.defaults.model.primary = 'openai/gpt-5.2';
 } else if (isOpenAI) {
     // Create custom openai provider config with baseUrl override
     // Omit apiKey so moltbot falls back to OPENAI_API_KEY env var
