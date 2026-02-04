@@ -187,17 +187,31 @@ if (process.env.TELEGRAM_BOT_TOKEN) {
     config.channels.telegram = config.channels.telegram || {};
     config.channels.telegram.botToken = process.env.TELEGRAM_BOT_TOKEN;
     config.channels.telegram.enabled = true;
-    config.channels.telegram.dm = config.channels.telegram.dm || {};
-    config.channels.telegram.dmPolicy = process.env.TELEGRAM_DM_POLICY || 'pairing';
+    const telegramDmPolicy = process.env.TELEGRAM_DM_POLICY || 'pairing';
+    config.channels.telegram.dmPolicy = telegramDmPolicy;
+    if (process.env.TELEGRAM_DM_ALLOW_FROM) {
+        // Explicit allowlist: "123,456,789" → ['123', '456', '789']
+        config.channels.telegram.allowFrom = process.env.TELEGRAM_DM_ALLOW_FROM.split(',');
+    } else if (telegramDmPolicy === 'open') {
+        // "open" policy requires allowFrom: ["*"]
+        config.channels.telegram.allowFrom = ['*'];
+    }
 }
 
 // Discord configuration
+// Note: Discord uses nested dm.policy, not flat dmPolicy like Telegram
+// See: https://github.com/moltbot/moltbot/blob/v2026.1.24-1/src/config/zod-schema.providers-core.ts#L147-L155
 if (process.env.DISCORD_BOT_TOKEN) {
     config.channels.discord = config.channels.discord || {};
     config.channels.discord.token = process.env.DISCORD_BOT_TOKEN;
     config.channels.discord.enabled = true;
+    const discordDmPolicy = process.env.DISCORD_DM_POLICY || 'pairing';
     config.channels.discord.dm = config.channels.discord.dm || {};
-    config.channels.discord.dm.policy = process.env.DISCORD_DM_POLICY || 'pairing';
+    config.channels.discord.dm.policy = discordDmPolicy;
+    // "open" policy requires allowFrom: ["*"]
+    if (discordDmPolicy === 'open') {
+        config.channels.discord.dm.allowFrom = ['*'];
+    }
 }
 
 // Slack configuration
@@ -208,14 +222,43 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
     config.channels.slack.enabled = true;
 }
 
-// Base URL override (e.g., for Cloudflare AI Gateway)
-// Usage: Set AI_GATEWAY_BASE_URL or ANTHROPIC_BASE_URL to your endpoint like:
+// Base URL override (e.g., for Cloudflare AI Gateway or OpenRouter)
+// Usage: Set AI_GATEWAY_BASE_URL, ANTHROPIC_BASE_URL, or OPENAI_BASE_URL to your endpoint like:
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/openai
-const baseUrl = (process.env.AI_GATEWAY_BASE_URL || process.env.ANTHROPIC_BASE_URL || '').replace(/\/+$/, '');
-const isOpenAI = baseUrl.endsWith('/openai');
+//   https://openrouter.ai/api/v1
+const baseUrl = (process.env.AI_GATEWAY_BASE_URL || process.env.OPENAI_BASE_URL || process.env.ANTHROPIC_BASE_URL || '').replace(/\/+$/, '');
+const isOpenRouter = !!process.env.OPENROUTER_API_KEY;
+const isOpenAI = isOpenRouter || baseUrl.endsWith('/openai');
 
-if (isOpenAI) {
+if (isOpenRouter) {
+    // OpenRouter configuration - uses OpenAI API protocol with OpenRouter-specific models
+    const openRouterBaseUrl = process.env.OPENAI_BASE_URL || 'https://openrouter.ai/api/v1';
+    console.log('Configuring OpenRouter provider with base URL:', openRouterBaseUrl);
+    config.models = config.models || {};
+    config.models.providers = config.models.providers || {};
+    config.models.providers.openai = {
+        baseUrl: openRouterBaseUrl,
+        api: 'openai-chat',
+        models: [
+            { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4', contextWindow: 200000 },
+            { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', contextWindow: 200000 },
+            { id: 'openai/gpt-4o', name: 'GPT-4o', contextWindow: 128000 },
+            { id: 'openai/gpt-4-turbo', name: 'GPT-4 Turbo', contextWindow: 128000 },
+            { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash', contextWindow: 1000000 },
+            { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat', contextWindow: 64000 },
+        ]
+    };
+    // Add models to the allowlist so they appear in /models
+    config.agents.defaults.models = config.agents.defaults.models || {};
+    config.agents.defaults.models['openai/anthropic/claude-sonnet-4'] = { alias: 'Claude Sonnet 4' };
+    config.agents.defaults.models['openai/anthropic/claude-3.5-sonnet'] = { alias: 'Claude 3.5 Sonnet' };
+    config.agents.defaults.models['openai/openai/gpt-4o'] = { alias: 'GPT-4o' };
+    config.agents.defaults.models['openai/openai/gpt-4-turbo'] = { alias: 'GPT-4 Turbo' };
+    config.agents.defaults.models['openai/google/gemini-2.0-flash-001'] = { alias: 'Gemini 2.0 Flash' };
+    config.agents.defaults.models['openai/deepseek/deepseek-chat'] = { alias: 'DeepSeek Chat' };
+    config.agents.defaults.model.primary = 'openai/anthropic/claude-sonnet-4';
+} else if (isOpenAI) {
     // Create custom openai provider config with baseUrl override
     // Omit apiKey so moltbot falls back to OPENAI_API_KEY env var
     console.log('Configuring OpenAI provider with base URL:', baseUrl);
