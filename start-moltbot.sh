@@ -239,7 +239,7 @@ if (isOpenRouter) {
     config.models.providers = config.models.providers || {};
     config.models.providers.openai = {
         baseUrl: openRouterBaseUrl,
-        api: 'openai-chat',
+        api: 'openai-responses',
         models: [
             { id: 'openai/gpt-5.2', name: 'GPT-5.2', contextWindow: 200000 },
             { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5', contextWindow: 200000 },
